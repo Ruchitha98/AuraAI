@@ -7,6 +7,9 @@ class MusicIntent(BaseModel):
     mood: str
     genres: List[str]
     energy: str
+    tempo: str
+    language: str
+    confidence: float
 
 
 class ChatRequest(BaseModel):
@@ -16,3 +19,4 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
     intent: MusicIntent
+    suggestions: List[str]

@@ -1,17 +1,13 @@
 from fastapi import APIRouter
-from app.schemas.chat import ChatRequest, ChatResponse, MusicIntent
+from app.schemas.chat import ChatRequest, ChatResponse
+from app.ai.provider import AIProvider
 
 router = APIRouter(prefix="/api/v1/chat", tags=["chat"])
+
+provider = AIProvider()
 
 
 @router.post("/", response_model=ChatResponse)
 def chat(request: ChatRequest):
-    return ChatResponse(
-        reply=f"I understand you're looking for music based on: {request.message}",
-        intent=MusicIntent(
-            activity="coding",
-            mood="focus",
-            genres=["ambient", "piano"],
-            energy="low",
-        ),
-    )
+    result = provider.generate_music_intent(request.message)
+    return result
