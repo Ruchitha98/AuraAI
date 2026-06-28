@@ -1,22 +1,61 @@
-import { Text, View, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { COLORS, FONT_SIZE, SPACING, RADIUS } from "../constants/theme";
+import PlaylistCard from "../components/ui/PlaylistCard";
+
+const tracks = [
+  {
+    title: "Calm Piano Focus",
+    meta: "Piano • 4:12",
+    description: "Soft instrumental focus track.",
+    icon: "musical-notes-outline",
+  },
+  {
+    title: "Deep Coding Flow",
+    meta: "Ambient • 3:48",
+    description: "Low distraction background music.",
+    icon: "laptop-outline",
+  },
+  {
+    title: "Night Rain Study",
+    meta: "Jazz • 5:01",
+    description: "Warm rainy-night atmosphere.",
+    icon: "rainy-outline",
+  },
+] as const;
 
 export default function PlaylistScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Generated Playlist</Text>
-      <Text style={styles.subtitle}>Made by Aura AI</Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.hero}>
+        <View style={styles.artwork}>
+          <Ionicons name="sparkles" size={54} color={COLORS.primaryLight} />
+        </View>
 
-      <View style={styles.card}>
-        <Text style={styles.songTitle}>Calm Piano Focus</Text>
-        <Text style={styles.artist}>Royalty Free Artist</Text>
+        <Text style={styles.label}>AI Generated Playlist</Text>
+        <Text style={styles.title}>Deep Focus Coding</Text>
+        <Text style={styles.subtitle}>
+          Built from your mood: calm, focused, instrumental.
+        </Text>
+
+        <TouchableOpacity style={styles.playButton}>
+          <Ionicons name="play" size={20} color={COLORS.white} />
+          <Text style={styles.playText}>Play Playlist</Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.songTitle}>Deep Coding Flow</Text>
-        <Text style={styles.artist}>Aura Library</Text>
-      </View>
-    </View>
+      <Text style={styles.sectionTitle}>Tracks</Text>
+
+      {tracks.map((track) => (
+        <PlaylistCard
+          key={track.title}
+          title={track.title}
+          meta={track.meta}
+          description={track.description}
+          icon={track.icon}
+        />
+      ))}
+    </ScrollView>
   );
 }
 
@@ -24,32 +63,62 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  content: {
     padding: SPACING.lg,
+    paddingTop: 64,
+    paddingBottom: 120,
+  },
+  hero: {
+    alignItems: "center",
+    marginBottom: SPACING.xl,
+  },
+  artwork: {
+    width: 180,
+    height: 180,
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.surface,
     justifyContent: "center",
+    alignItems: "center",
+    marginBottom: SPACING.lg,
+  },
+  label: {
+    color: COLORS.primaryLight,
+    fontSize: FONT_SIZE.sm,
+    fontWeight: "700",
+    marginBottom: SPACING.sm,
   },
   title: {
     color: COLORS.textPrimary,
-    fontSize: FONT_SIZE.xl,
-    fontWeight: "700",
+    fontSize: FONT_SIZE.xxl,
+    fontWeight: "800",
+    textAlign: "center",
   },
   subtitle: {
     color: COLORS.textSecondary,
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.xl,
-  },
-  card: {
-    backgroundColor: COLORS.surface,
-    padding: SPACING.md,
-    borderRadius: RADIUS.md,
-    marginBottom: SPACING.md,
-  },
-  songTitle: {
-    color: COLORS.textPrimary,
     fontSize: FONT_SIZE.md,
-    fontWeight: "600",
+    textAlign: "center",
+    lineHeight: 24,
+    marginTop: SPACING.sm,
   },
-  artist: {
-    color: COLORS.textMuted,
-    marginTop: SPACING.xs,
+  playButton: {
+    backgroundColor: COLORS.primary,
+    borderRadius: RADIUS.full,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: SPACING.xl,
+  },
+  playText: {
+    color: COLORS.white,
+    fontWeight: "800",
+    marginLeft: SPACING.sm,
+  },
+  sectionTitle: {
+    color: COLORS.textPrimary,
+    fontSize: FONT_SIZE.lg,
+    fontWeight: "800",
+    marginBottom: SPACING.md,
   },
 });
