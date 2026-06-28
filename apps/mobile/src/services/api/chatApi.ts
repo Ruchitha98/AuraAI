@@ -10,7 +10,7 @@ export type MusicIntent = {
     intent: MusicIntent;
   };
   
-  const API_BASE_URL = "http://127.0.0.1:8000";
+  const API_BASE_URL = "http://192.168.1.96:8000";
   
   export async function sendChatMessage(message: string): Promise<ChatResponse> {
     const response = await fetch(`${API_BASE_URL}/api/v1/chat/`, {

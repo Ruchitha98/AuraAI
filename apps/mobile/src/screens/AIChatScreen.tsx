@@ -1,7 +1,14 @@
+import { useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, FONT_SIZE, SPACING, RADIUS } from "../constants/theme";
 import AIOrb from "../components/ui/AIOrb";
+import { sendChatMessage } from "../services/api/chatApi";
+
+type ChatMessage = {
+  role: "user" | "aura";
+  text: string;
+};
 
 const suggestions = [
   "Music for deep focus while coding",
@@ -11,6 +18,47 @@ const suggestions = [
 ];
 
 export default function AIChatScreen() {
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      role: "aura",
+      text: "Hi Ruchitha, what kind of soundtrack do you need today?",
+    },
+  ]);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSend(messageText?: string) {
+    const text = messageText ?? input.trim();
+
+    if (!text || loading) return;
+
+    setMessages((prev) => [...prev, { role: "user", text }]);
+    setInput("");
+    setLoading(true);
+
+    try {
+      const response = await sendChatMessage(text);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "aura",
+          text: `${response.reply}\n\nMood: ${response.intent.mood}\nActivity: ${response.intent.activity}\nGenres: ${response.intent.genres.join(", ")}\nEnergy: ${response.intent.energy}`,
+        },
+      ]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "aura",
+          text: "Sorry, I couldn't connect to Aura backend. Please try again.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -22,20 +70,25 @@ export default function AIChatScreen() {
           </Text>
         </View>
 
-        <View style={styles.messageAura}>
-          <Text style={styles.messageText}>
-            Hi Ruchitha, what kind of soundtrack do you need today?
-          </Text>
-        </View>
+        {messages.map((message, index) => (
+          <View
+            key={`${message.role}-${index}`}
+            style={message.role === "user" ? styles.messageUser : styles.messageAura}
+          >
+            <Text style={styles.messageText}>{message.text}</Text>
+          </View>
+        ))}
 
         <Text style={styles.sectionTitle}>Try asking</Text>
 
         {suggestions.map((item) => (
-          <TouchableOpacity key={item} style={styles.suggestion}>
+          <TouchableOpacity key={item} style={styles.suggestion} onPress={() => handleSend(item)}>
             <Ionicons name="sparkles" size={18} color={COLORS.primaryLight} />
             <Text style={styles.suggestionText}>{item}</Text>
           </TouchableOpacity>
         ))}
+
+        {loading && <Text style={styles.loading}>Aura is thinking...</Text>}
       </ScrollView>
 
       <View style={styles.inputBar}>
@@ -43,8 +96,10 @@ export default function AIChatScreen() {
           style={styles.input}
           placeholder="Tell Aura what you want..."
           placeholderTextColor={COLORS.textMuted}
+          value={input}
+          onChangeText={setInput}
         />
-        <TouchableOpacity style={styles.sendButton}>
+        <TouchableOpacity style={styles.sendButton} onPress={() => handleSend()}>
           <Ionicons name="send" size={20} color={COLORS.white} />
         </TouchableOpacity>
       </View>
@@ -53,14 +108,11 @@ export default function AIChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
+  container: { flex: 1, backgroundColor: COLORS.background },
   content: {
     padding: SPACING.lg,
     paddingTop: 64,
-    paddingBottom: 140,
+    paddingBottom: 160,
   },
   header: {
     alignItems: "center",
@@ -83,7 +135,17 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
     padding: SPACING.lg,
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.md,
+    alignSelf: "flex-start",
+    maxWidth: "92%",
+  },
+  messageUser: {
+    backgroundColor: COLORS.primary,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    alignSelf: "flex-end",
+    maxWidth: "92%",
   },
   messageText: {
     color: COLORS.textPrimary,
@@ -94,6 +156,7 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontSize: FONT_SIZE.lg,
     fontWeight: "800",
+    marginTop: SPACING.lg,
     marginBottom: SPACING.md,
   },
   suggestion: {
@@ -109,6 +172,10 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZE.md,
     fontWeight: "600",
     marginLeft: SPACING.sm,
+  },
+  loading: {
+    color: COLORS.primaryLight,
+    marginTop: SPACING.md,
   },
   inputBar: {
     position: "absolute",

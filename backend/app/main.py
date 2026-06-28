@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.api.chat import router as chat_router
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="AuraAI Backend",
