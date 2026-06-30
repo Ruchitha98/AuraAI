@@ -3,7 +3,9 @@ import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, FONT_SIZE, SPACING, RADIUS } from "../constants/theme";
 import AIOrb from "../components/ui/AIOrb";
+import RecommendationCard from "../components/ui/RecommendationCard";
 import { sendChatMessage } from "../services/api/chatApi";
+import type { SongRecommendation } from "../services/api/chatApi";
 
 type ChatMessage = {
   role: "user" | "aura";
@@ -19,6 +21,7 @@ const suggestions = [
 
 export default function AIChatScreen() {
   const [input, setInput] = useState("");
+  const [recommendations, setRecommendations] = useState<SongRecommendation[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "aura",
@@ -34,10 +37,12 @@ export default function AIChatScreen() {
 
     setMessages((prev) => [...prev, { role: "user", text }]);
     setInput("");
+    setRecommendations([]);
     setLoading(true);
 
     try {
       const response = await sendChatMessage(text);
+      setRecommendations(response.recommendations ?? []);
 
       setMessages((prev) => [
         ...prev,
@@ -78,6 +83,15 @@ export default function AIChatScreen() {
             <Text style={styles.messageText}>{message.text}</Text>
           </View>
         ))}
+
+        {recommendations.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Recommended for you</Text>
+            {recommendations.map((song) => (
+              <RecommendationCard key={`${song.title}-${song.artist}`} song={song} />
+            ))}
+          </>
+        )}
 
         <Text style={styles.sectionTitle}>Try asking</Text>
 
